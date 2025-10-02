@@ -10,17 +10,19 @@ window.onload = function () {
       // console.log(`${index}: ${d.Name} - ${d.Hex}`);
     });
 
-    const spacing = 70; 
+    const spacing = 70;
     const startX = 50;
-    
+
     for (let i = 0; i < data.length; i++) {
-      console.log(`Creating circle ${i} with color: ${data[i].Name} - ${data[i].Hex}`);
+      console.log(
+        `Creating circle ${i} with color: ${data[i].Name} - ${data[i].Hex}`
+      );
       svg
-      .append("circle")
-      .attr("cx", startX + (i * spacing))
-      .attr("cy", 100)
-      .attr("r", 30)
-      .style("fill", data[i].Hex);
+        .append("circle")
+        .attr("cx", startX + i * spacing)
+        .attr("cy", 100)
+        .attr("r", 30)
+        .style("fill", data[i].Hex);
     }
   });
 };
