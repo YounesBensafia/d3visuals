@@ -1,0 +1,31 @@
+movie_id,title,genre,release_date,budget_millions,revenue_millions,rating_imdb,rating_rotten_tomatoes,duration_minutes,studio,director,lead_actor,production_year,country,language,awards_won,sequel,franchise
+1,Cosmic Guardians,Sci-Fi,2024-05-15,180,645,8.2,89,142,Marvel Studios,Sarah Chen,Alex Rivera,2024,USA,English,3,false,Marvel
+2,The Last Symphony,Drama,2024-03-22,45,156,7.8,92,118,A24,Marcus Johnson,Elena Vasquez,2024,USA,English,5,false,Original
+3,Speed Zone,Action,2024-07-04,120,389,7.1,78,108,Universal,David Kim,Ryan Torres,2024,USA,English,0,false,Original
+4,Enchanted Realms,Fantasy,2024-12-20,200,578,8.0,85,156,Disney,Rebecca Martinez,Jamie Wilson,2024,USA,English,2,false,Original
+5,Digital Nightmare,Horror,2024-10-31,25,89,6.8,74,95,Blumhouse,Tommy Anderson,Morgan Lee,2024,USA,English,1,false,Original
+6,Love in Paris,Romance,2024-02-14,30,112,7.4,81,102,Sony Pictures,Claire Dubois,Lucas Martin,2024,France,French,0,false,Original
+7,The Detective Returns,Crime,2024-09-08,85,234,7.9,87,125,Warner Bros,Michael Stone,Detective Blake,2024,USA,English,1,true,Detective Series
+8,Laugh Out Loud,Comedy,2024-06-12,40,167,7.2,79,98,Paramount,Lisa Park,Comedy King,2024,USA,English,0,false,Original
+9,Time Travelers,Sci-Fi,2024-11-15,150,423,8.1,83,134,Sony Pictures,James Wu,Time Master,2024,USA,English,2,false,Original
+10,Mountain Rescue,Adventure,2024-08-25,75,198,7.6,86,115,National Geographic,Adventure Pro,Mountain Girl,2024,USA,English,1,false,Original
+11,Cyber Warriors,Action,2024-04-18,110,345,7.3,80,122,Netflix,Cyber Director,Hacker Hero,2024,USA,English,0,false,Original
+12,The Piano Lesson,Drama,2024-01-10,35,87,8.3,94,105,Independent,Music Maestro,Piano Player,2024,USA,English,4,false,Original
+13,Space Pirates,Sci-Fi,2024-06-28,140,456,7.7,82,128,Disney,Space Captain,Pirate Leader,2024,USA,English,1,false,Original
+14,Haunted Manor,Horror,2024-10-13,18,67,6.5,71,88,Horror House,Spooky Director,Scared Actor,2024,USA,English,0,false,Original
+15,Soccer Dreams,Sports,2024-07-19,55,145,7.5,84,110,Sports Films,Coach Wilson,Soccer Star,2024,Brazil,Portuguese,1,false,Original
+16,Royal Wedding,Romance,2024-05-03,42,123,7.0,77,95,Romantic Films,Love Director,Royal Bride,2024,UK,English,0,false,Original
+17,Bank Heist,Crime,2024-03-07,95,267,8.0,88,118,Crime Studios,Heist Master,Bank Robber,2024,USA,English,2,false,Original
+18,Family Vacation,Comedy,2024-12-22,35,134,6.9,75,92,Family Films,Fun Director,Dad Character,2024,USA,English,0,false,Original
+19,Dragon Quest,Fantasy,2024-08-11,170,489,8.4,91,145,Fantasy World,Dragon Master,Knight Hero,2024,USA,English,3,false,Original
+20,Ocean Deep,Adventure,2024-09-29,80,189,7.8,85,108,Ocean Films,Sea Captain,Diver Hero,2024,Australia,English,1,false,Original
+21,Robot Revolution,Sci-Fi,2024-05-24,160,523,7.9,86,139,Tech Studios,Robot Master,AI Hero,2024,Japan,Japanese,2,false,Original
+22,Midnight Express,Thriller,2024-11-01,65,178,7.6,83,106,Thriller Inc,Night Director,Express Driver,2024,USA,English,0,false,Original
+23,Art of Love,Romance,2024-02-29,28,98,7.2,79,89,Art Films,Artist Director,Painter Love,2024,Italy,Italian,1,false,Original
+24,Desert Storm,War,2024-04-25,120,298,8.1,89,132,War Pictures,War General,Soldier Hero,2024,USA,English,2,false,Original
+25,Magic School,Fantasy,2024-07-15,85,267,7.7,81,114,Magic Studios,Wizard Master,Young Wizard,2024,UK,English,1,false,Original
+26,Street Racing,Action,2024-06-01,90,234,7.4,78,103,Speed Films,Race Director,Street Racer,2024,USA,English,0,false,Original
+27,The Scientist,Drama,2024-10-05,38,145,8.2,93,121,Science Films,Lab Director,Scientist Hero,2024,Germany,German,3,false,Original
+28,Jungle Adventure,Adventure,2024-08-08,70,198,7.5,82,109,Jungle Films,Explorer Guide,Jungle Hero,2024,Costa Rica,Spanish,1,false,Original
+29,Comedy Club,Comedy,2024-03-15,25,89,6.8,73,85,Laugh Factory,Comedy Pro,Stand-up Star,2024,USA,English,0,false,Original
+30,Space Station,Sci-Fi,2024-12-08,135,412,8.0,87,127,Space Agency,Astronaut Chief,Space Commander,2024,USA,English,2,false,Original
