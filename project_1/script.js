@@ -1,30 +1,57 @@
 window.onload = function () {
+  const columns = 15; 
+  const circleRadius = 24;
+  const hSpacing = 80;
+  const vSpacing = 75;
+  const margin = { top: 30, right: 20, bottom: 100, left: 20 };
+
   const svg = d3
     .select("#chart")
     .append("svg")
     .attr("width", 1500)
-    .attr("height", 200)
-    .style("border", "1px solid black")
-    .style("background-color", "red");
+    .attr("height", 400)
+    .style("background-color", "white");
 
   d3.csv("./data/named_colors_css.csv").then((data) => {
+    const n = data.length;
+    const rows = Math.ceil(n / columns);
 
-    const spacing = 70;
-    const startX = 50;
+    const svgWidth = margin.left + margin.right + columns * hSpacing;
+    const svgHeight = margin.top + margin.bottom + rows * vSpacing;
+    svg.attr("width", svgWidth).attr("height", svgHeight);
 
-    for (let i = 0; i < data.length; i++) {
-      console.log(
-        `Creating circle ${i} with color: ${data[i].Name} - ${data[i].Hex}`
-      );
-      const row = Math.floor(i / 10);
-      const col = i % 10;
+    const group = svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-      svg
-        .append("circle")
-        .attr("cx", startX + col * spacing)
-        .attr("cy", 100 + row * spacing)
-        .attr("r", 30)
-        .style("fill", data[i].Hex);
-    }
+    const items = group
+      .selectAll("g.colorItem")
+      .data(data)
+      .enter()
+      .append("g")
+      .attr("class", "colorItem")
+      .attr("transform", (d, i) => {
+        const row = Math.floor(i / columns);
+        const col = i % columns;
+        const x = col * hSpacing + circleRadius;
+        const y = row * vSpacing + circleRadius;
+        return `translate(${x}, ${y})`;
+      });
+
+    items
+      .append("circle")
+      .attr("r", circleRadius)
+      .style("fill", (d) => d.Hex)
+      .style("stroke", "#000")
+      .style("stroke-width", 2)
+
+    items
+      .append("text")
+      .text((d) => d.Name)
+      .attr("y", circleRadius + 18)
+      .attr("text-anchor", "middle")
+      .attr("font-weight", "bold")
+      .style("font-size", "12px")
+      .style("fill", "#333");
   });
 };
