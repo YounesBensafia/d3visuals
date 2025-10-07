@@ -12,7 +12,7 @@ window.onload = function () {
     .attr("height", 400)
     .style("background-color", "white");
 
-  d3.csv("./data/named_colors_css.csv").then((data) => {
+  d3.csv("../data/named_colors_css.csv").then((data) => {
     const n = data.length;
     const rows = Math.ceil(n / columns);
 
