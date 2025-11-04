@@ -1,6 +1,5 @@
 window.onload = function () {
   let container = d3.select("#chart2");
-  // Fallbacks: `#visualization` (used in index.html) or body
   if (container.empty()) container = d3.select("#visualization");
   if (container.empty()) container = d3.select("body");
   const W = 900,
@@ -17,13 +16,12 @@ window.onload = function () {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Gaussian kernel K(t) = (1/sqrt(2*pi)) * e^(-t^2/2)
   function K(t) {
     return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * t * t);
   }
 
-  const h = 3; // bandwidth
-  const sampleLimit = 892; // first 20 valid ages per gender
+  const h = 3; 
+  const sampleLimit = 892;
 
   d3.csv("../data/titanic-data.csv", (d) => ({
     Age: d.Age === "" || d.Age === undefined ? null : +d.Age,
@@ -184,7 +182,7 @@ window.onload = function () {
       svg
         .append("path")
         .attr("d", femaleAreaPath)
-        .attr("fill", "#F29E4C")
+        .attr("fill", "#ff1100ff")
         .attr("fill-opacity", 0.3);
 
       svg
