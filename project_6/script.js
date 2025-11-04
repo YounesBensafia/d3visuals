@@ -18,7 +18,6 @@ window.onload = function () {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // helper kernel and KDE (unweighted)
   function gaussianKernel(u) {
     return Math.exp(-0.5 * u * u) / Math.sqrt(2 * Math.PI);
   }
@@ -36,10 +35,8 @@ window.onload = function () {
     return density;
   }
 
-  // load data
   d3.csv("../data/titanic-data.csv")
     .then((raw) => {
-      // parse ages
       const ages = raw.map((d) => +d.Age).filter((a) => !isNaN(a));
       if (ages.length === 0) {
         d3.select(container.node())
@@ -49,13 +46,11 @@ window.onload = function () {
         return;
       }
 
-      // scales
       const x = d3
         .scaleLinear()
         .domain(d3.extent(ages))
         .range([0, width])
         .nice();
-      // bandwidth changed to 10 as requested
       const density = kde(gaussianKernel, 3, ages, d3.extent(ages), 300);
       const y = d3
         .scaleLinear()
@@ -63,14 +58,12 @@ window.onload = function () {
         .range([height, 0])
         .nice();
 
-      // axes
       svg
         .append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x));
       svg.append("g").call(d3.axisLeft(y));
 
-      // line
       const line = d3
         .line()
         .x((d) => x(d.x))
@@ -84,7 +77,6 @@ window.onload = function () {
         .attr("stroke-width", 2)
         .attr("d", line);
 
-      // area under curve
       const area = d3
         .area()
         .x((d) => x(d.x))
@@ -98,7 +90,6 @@ window.onload = function () {
         .attr("opacity", 0.15)
         .attr("d", area);
 
-      // labels
       svg
         .append("text")
         .attr("x", width / 2)
@@ -111,7 +102,7 @@ window.onload = function () {
         .attr("text-anchor", "middle")
         .text("Density");
 
-      // title
+    
       d3.select(container.node())
         .select("svg")
         .append("text")
