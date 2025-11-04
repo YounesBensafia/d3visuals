@@ -1,121 +1,236 @@
 window.onload = function () {
-  // KDE plot of passenger ages (project_6)
-  const outerWidth = 700;
-  const outerHeight = 460;
-  const margin = { top: 20, right: 20, bottom: 50, left: 60 };
-  const width = outerWidth - margin.left - margin.right;
-  const height = outerHeight - margin.top - margin.bottom;
-
-  const container = d3.select("#chart").empty()
-    ? d3.select("body")
-    : d3.select("#chart");
+  let container = d3.select("#chart2");
+  // Fallbacks: `#visualization` (used in index.html) or body
+  if (container.empty()) container = d3.select("#visualization");
+  if (container.empty()) container = d3.select("body");
+  const W = 900,
+    H = 450;
+  const margin = { top: 40, right: 30, bottom: 60, left: 70 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
 
   const svg = container
     .append("svg")
-    .attr("width", outerWidth)
-    .attr("height", outerHeight)
-    .style("background", "#fff")
+    .attr("width", W)
+    .attr("height", H)
+    .style("background", "#fafafa")
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  function gaussianKernel(u) {
-    return Math.exp(-0.5 * u * u) / Math.sqrt(2 * Math.PI);
+  // Gaussian kernel K(t) = (1/sqrt(2*pi)) * e^(-t^2/2)
+  function K(t) {
+    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * t * t);
   }
 
-  function kde(kernel, bandwidth, values, domain, samples = 200) {
-    const [min, max] = domain;
-    const step = (max - min) / (samples - 1);
-    const density = [];
-    for (let i = 0; i < samples; i++) {
-      const x = min + i * step;
-      let sum = 0;
-      for (const v of values) sum += kernel((x - v) / bandwidth);
-      density.push({ x, y: sum / (values.length * bandwidth) });
-    }
-    return density;
-  }
+  const h = 3; // bandwidth
+  const sampleLimit = 892; // first 20 valid ages per gender
 
-  d3.csv("../data/titanic-data.csv")
-    .then((raw) => {
-      const ages = raw.map((d) => +d.Age).filter((a) => !isNaN(a));
-      if (ages.length === 0) {
-        d3.select(container.node())
-          .append("p")
-          .text("No Age values found in CSV.");
-        console.error("No Age values found in CSV");
+  d3.csv("../data/titanic-data.csv", (d) => ({
+    Age: d.Age === "" || d.Age === undefined ? null : +d.Age,
+    Gender: d.Gender ?? d.Sex,
+  }))
+    .then((rows) => {
+      const maleAgesAll = rows
+        .filter((r) => r.Gender === "male" && !isNaN(r.Age))
+        .map((r) => r.Age);
+      const femaleAgesAll = rows
+        .filter((r) => r.Gender === "female" && !isNaN(r.Age))
+        .map((r) => r.Age);
+
+      const maleXi = maleAgesAll.slice(0, sampleLimit);
+      const femaleXi = femaleAgesAll.slice(0, sampleLimit);
+
+      const nMale = maleXi.length;
+      const nFemale = femaleXi.length;
+
+      if (nMale === 0 && nFemale === 0) {
+        container.append("p").text("No age data available.");
         return;
       }
 
+      const allAges = rows
+        .map((r) => r.Age)
+        .filter((a) => a !== null && !isNaN(a));
+      const minAge = Math.floor(d3.min(allAges));
+      const maxAge = Math.ceil(d3.max(allAges));
+      const step = 0.1;
+      const xj = d3.range(minAge, maxAge + step, step);
+
+      function computeKDE(xi_data) {
+        const n = xi_data.length;
+        if (n === 0) return xj.map((x) => 0);
+
+        const inv_nh = 1 / (n * h);
+        const densities = xj.map((xj_val) => {
+          let sum = 0;
+          for (let i = 0; i < n; i++) {
+            const t = (xj_val - xi_data[i]) / h;
+            sum += K(t);
+          }
+          return inv_nh * sum;
+        });
+        return densities;
+      }
+
+      const maleDensity = computeKDE(maleXi);
+      const femaleDensity = computeKDE(femaleXi);
+
       const x = d3
         .scaleLinear()
-        .domain(d3.extent(ages))
-        .range([0, width])
+        .domain([Math.max(0, minAge - 2), maxAge + 2])
+        .range([0, innerW])
         .nice();
-      const density = kde(gaussianKernel, 3, ages, d3.extent(ages), 300);
-      const y = d3
-        .scaleLinear()
-        .domain([0, d3.max(density, (d) => d.y)])
-        .range([height, 0])
-        .nice();
+
+      const y = d3.scaleLinear().domain([0, 0.04]).range([innerH, 0]);
 
       svg
         .append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x));
-      svg.append("g").call(d3.axisLeft(y));
+        .attr("transform", `translate(0, ${innerH})`)
+        .call(d3.axisBottom(x).ticks(10))
+        .selectAll("text")
+        .style("font-size", "11px");
 
-      const line = d3
-        .line()
-        .x((d) => x(d.x))
-        .y((d) => y(d.y))
-        .curve(d3.curveBasis);
+      svg
+        .append("g")
+        .call(d3.axisLeft(y).ticks(8))
+        .selectAll("text")
+        .style("font-size", "11px");
+
+      svg
+        .append("text")
+        .attr("x", innerW / 2)
+        .attr("y", innerH + 45)
+        .attr("text-anchor", "middle")
+        .text("Âge (ans)")
+        .style("font-size", "13px")
+        .style("font-weight", "bold");
+
+      svg
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerH / 2)
+        .attr("y", -55)
+        .attr("text-anchor", "middle")
+        .text("Densité estimée")
+        .style("font-size", "13px")
+        .style("font-weight", "bold");
+
+      function drawLineForDensity(densityArray) {
+        let pathData = "";
+        for (let idx = 0; idx < xj.length; idx++) {
+          const xVal = x(xj[idx]);
+          const yVal = y(densityArray[idx]);
+          if (idx === 0) {
+            pathData += `M ${xVal} ${yVal}`;
+          } else {
+            pathData += ` L ${xVal} ${yVal}`;
+          }
+        }
+        return pathData;
+      }
+
+      const malePath = drawLineForDensity(maleDensity);
       svg
         .append("path")
-        .datum(density)
-        .attr("fill", "none")
-        .attr("stroke", "#1f77b4")
-        .attr("stroke-width", 2)
-        .attr("d", line);
+        .attr("d", malePath)
+        .attr("stroke", "#2E86AB")
+        .attr("stroke-width", 2.5)
+        .attr("fill", "none");
 
-      const area = d3
-        .area()
-        .x((d) => x(d.x))
-        .y0(height)
-        .y1((d) => y(d.y))
-        .curve(d3.curveBasis);
+      let maleAreaPath = "";
+      for (let idx = 0; idx < xj.length; idx++) {
+        const xVal = x(xj[idx]);
+        const yVal = y(maleDensity[idx]);
+        if (idx === 0) {
+          maleAreaPath += `M ${xVal} ${yVal}`;
+        } else {
+          maleAreaPath += ` L ${xVal} ${yVal}`;
+        }
+      }
+      for (let idx = xj.length - 1; idx >= 0; idx--) {
+        const xVal = x(xj[idx]);
+        maleAreaPath += ` L ${xVal} ${y(0)}`;
+      }
+      maleAreaPath += " Z";
       svg
         .append("path")
-        .datum(density)
-        .attr("fill", "#1f77b4")
-        .attr("opacity", 0.15)
-        .attr("d", area);
+        .attr("d", maleAreaPath)
+        .attr("fill", "#2E86AB")
+        .attr("fill-opacity", 0.3);
+
+      const femalePath = drawLineForDensity(femaleDensity);
+      svg
+        .append("path")
+        .attr("d", femalePath)
+        .attr("stroke", "#F29E4C")
+        .attr("stroke-width", 2.5)
+        .attr("fill", "none");
+
+      let femaleAreaPath = "";
+      for (let idx = 0; idx < xj.length; idx++) {
+        const xVal = x(xj[idx]);
+        const yVal = y(femaleDensity[idx]);
+        if (idx === 0) {
+          femaleAreaPath += `M ${xVal} ${yVal}`;
+        } else {
+          femaleAreaPath += ` L ${xVal} ${yVal}`;
+        }
+      }
+      for (let idx = xj.length - 1; idx >= 0; idx--) {
+        const xVal = x(xj[idx]);
+        femaleAreaPath += ` L ${xVal} ${y(0)}`;
+      }
+      femaleAreaPath += " Z";
+      svg
+        .append("path")
+        .attr("d", femaleAreaPath)
+        .attr("fill", "#F29E4C")
+        .attr("fill-opacity", 0.3);
 
       svg
-        .append("text")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 10)
-        .attr("text-anchor", "middle")
-        .text("Age");
-      svg
-        .append("text")
-        .attr("transform", `translate(-40, ${height / 2}) rotate(-90)`)
-        .attr("text-anchor", "middle")
-        .text("Density");
+        .append("line")
+        .attr("x1", 0)
+        .attr("x2", innerW)
+        .attr("y1", y(0))
+        .attr("y2", y(0))
+        .attr("stroke", "#999")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "3,3");
 
-    
-      d3.select(container.node())
-        .select("svg")
+      const legend = svg
+        .append("g")
+        .attr("transform", `translate(${innerW - 200}, -25)`);
+
+      legend
+        .append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", 5)
+        .attr("fill", "#2E86AB");
+      legend
         .append("text")
-        .attr("x", outerWidth / 2)
-        .attr("y", 16)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .text("KDE of Titanic passenger ages");
+        .attr("x", 12)
+        .attr("y", 4)
+        .text(`Male (n=${nMale})`)
+        .style("font-size", "11px");
+
+      legend
+        .append("circle")
+        .attr("cx", 0)
+        .attr("cy", 20)
+        .attr("r", 5)
+        .attr("fill", "#F29E4C");
+      legend
+        .append("text")
+        .attr("x", 12)
+        .attr("y", 24)
+        .text(`Female (n=${nFemale})`)
+        .style("font-size", "11px");
     })
     .catch((err) => {
-      console.error("Failed to load ../data/titanic-data.csv", err);
-      d3.select(container.node())
+      container
         .append("p")
-        .text("Error loading CSV (see console)");
+        .text("Erreur chargement CSV: " + err.message)
+        .style("color", "red");
     });
 };
