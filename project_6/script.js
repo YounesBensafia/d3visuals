@@ -100,7 +100,7 @@ window.onload = function () {
         .attr("y", innerH + 45)
         .attr("text-anchor", "middle")
         .text("Âge (ans)")
-        .style("font-size", "13px")
+        .style("font-size", "20px")
         .style("font-weight", "bold");
 
       svg
@@ -110,7 +110,7 @@ window.onload = function () {
         .attr("y", -55)
         .attr("text-anchor", "middle")
         .text("Densité estimée")
-        .style("font-size", "13px")
+        .style("font-size", "20px")
         .style("font-weight", "bold");
 
       function drawLineForDensity(densityArray) {
@@ -209,8 +209,8 @@ window.onload = function () {
         .append("text")
         .attr("x", 12)
         .attr("y", 4)
-        .text(`Male (n=${nMale})`)
-        .style("font-size", "11px");
+        .text(`Male`)
+        .style("font-size", "15px");
 
       legend
         .append("circle")
@@ -222,8 +222,8 @@ window.onload = function () {
         .append("text")
         .attr("x", 12)
         .attr("y", 24)
-        .text(`Female (n=${nFemale})`)
-        .style("font-size", "11px");
+        .text(`Female`)
+        .style("font-size", "15px");
     })
     .catch((err) => {
       container
