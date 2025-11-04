@@ -56,7 +56,7 @@ window.onload = function () {
         .range([0, width])
         .nice();
       // bandwidth changed to 10 as requested
-      const density = kde(gaussianKernel, 10, ages, d3.extent(ages), 300);
+      const density = kde(gaussianKernel, 3, ages, d3.extent(ages), 300);
       const y = d3
         .scaleLinear()
         .domain([0, d3.max(density, (d) => d.y)])
