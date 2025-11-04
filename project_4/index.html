@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chart</title>
+    <style>
+      #chart {
+        display: flex;
+        justify-content: center;
+        padding: 12px 0;
+      }
+      #chart svg {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      }
+      .tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        padding: 10px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
