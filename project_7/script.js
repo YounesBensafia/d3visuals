@@ -111,8 +111,14 @@ window.onload = function () {
         .attr("y1", "0%")
         .attr("x2", "0%")
         .attr("y2", "100%");
-      gradient.append("stop").attr("offset", "0%").attr("stop-color", "#69b3a2");
-      gradient.append("stop").attr("offset", "100%").attr("stop-color", "#5a9e8f");
+      gradient
+        .append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#69b3a2");
+      gradient
+        .append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#5a9e8f");
 
       // Add grid lines
       svg
@@ -261,34 +267,42 @@ window.onload = function () {
         .style("font-weight", "500")
         .style("fill", "#2c3e50");
 
-      // Y axis label
+      // Y axis label with enhanced styling
       svg
         .append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", -margin.left + 20)
+        .attr("y", -margin.left + 25)
         .attr("x", -height / 2)
         .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
+        .style("font-size", "15px")
+        .style("font-weight", "600")
+        .style("fill", "#2c3e50")
+        .style("font-family", "Arial, sans-serif")
         .text("Valeur normalisée (Z-score)");
 
-      // X axis label
+      // X axis label with enhanced styling
       svg
         .append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 15)
+        .attr("y", height + margin.bottom - 20)
         .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
+        .style("font-size", "15px")
+        .style("font-weight", "600")
+        .style("fill", "#2c3e50")
+        .style("font-family", "Arial, sans-serif")
         .text("Variables");
 
+      // Title with enhanced styling and shadow effect
       svg
         .append("text")
         .attr("x", width / 2)
-        .attr("y", -20)
+        .attr("y", -25)
         .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("font-weight", "bold")
+        .style("font-size", "20px")
+        .style("font-weight", "700")
+        .style("fill", "#1a252f")
+        .style("font-family", "Arial, sans-serif")
+        .style("text-shadow", "2px 2px 4px rgba(0,0,0,0.2)")
         .text("Boxplots des variables normalisées (Abalone)");
 
       // Legend
