@@ -305,77 +305,111 @@ window.onload = function () {
         .style("text-shadow", "2px 2px 4px rgba(0,0,0,0.2)")
         .text("Boxplots des variables normalisées (Abalone)");
 
-      // Legend
-      const legend = svg.append("g").attr("transform", `translate(10, 10)`);
+      // Legend with enhanced background and styling
+      const legend = svg.append("g").attr("transform", `translate(15, 15)`);
+
+      // Legend background
+      legend
+        .append("rect")
+        .attr("x", -8)
+        .attr("y", -8)
+        .attr("width", 140)
+        .attr("height", 90)
+        .attr("fill", "white")
+        .attr("opacity", 0.9)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr("stroke", "#ddd")
+        .attr("stroke-width", 1.5);
+
       legend
         .append("rect")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", 15)
-        .attr("height", 15)
-        .attr("fill", "#69b3a2")
+        .attr("width", 18)
+        .attr("height", 18)
+        .attr("fill", "url(#boxGradient)")
         .attr("stroke", "#2d5f5d")
-        .attr("opacity", 0.8);
-      legend
-        .append("text")
-        .attr("x", 20)
-        .attr("y", 12)
-        .text("Q1-Q3 (IQR)")
-        .style("font-size", "11px");
-
-      legend
-        .append("line")
-        .attr("x1", 0)
-        .attr("x2", 15)
-        .attr("y1", 28)
-        .attr("y2", 28)
-        .attr("stroke", "#1a3634")
-        .attr("stroke-width", 3);
-      legend
-        .append("text")
-        .attr("x", 20)
-        .attr("y", 32)
-        .text("Médiane")
-        .style("font-size", "11px");
-
-      legend
-        .append("line")
-        .attr("x1", 0)
-        .attr("x2", 15)
-        .attr("y1", 46)
-        .attr("y2", 46)
-        .attr("stroke", "#d9534f")
         .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "4 4");
+        .attr("rx", 3)
+        .attr("opacity", 0.85);
       legend
         .append("text")
-        .attr("x", 20)
-        .attr("y", 50)
+        .attr("x", 24)
+        .attr("y", 13)
+        .text("Q1-Q3 (IQR)")
+        .style("font-size", "12px")
+        .style("font-weight", "500")
+        .style("fill", "#2c3e50");
+
+      legend
+        .append("line")
+        .attr("x1", 0)
+        .attr("x2", 18)
+        .attr("y1", 32)
+        .attr("y2", 32)
+        .attr("stroke", "#0a2120")
+        .attr("stroke-width", 3.5)
+        .attr("stroke-linecap", "round");
+      legend
+        .append("text")
+        .attr("x", 24)
+        .attr("y", 36)
+        .text("Médiane")
+        .style("font-size", "12px")
+        .style("font-weight", "500")
+        .style("fill", "#2c3e50");
+
+      legend
+        .append("line")
+        .attr("x1", 0)
+        .attr("x2", 18)
+        .attr("y1", 52)
+        .attr("y2", 52)
+        .attr("stroke", "#c0392b")
+        .attr("stroke-width", 2.5)
+        .attr("stroke-dasharray", "6 4")
+        .attr("stroke-linecap", "round");
+      legend
+        .append("text")
+        .attr("x", 24)
+        .attr("y", 56)
         .text("Moyenne")
-        .style("font-size", "11px");
+        .style("font-size", "12px")
+        .style("font-weight", "500")
+        .style("fill", "#2c3e50");
 
       legend
         .append("circle")
-        .attr("cx", 7)
-        .attr("cy", 66)
-        .attr("r", 3)
+        .attr("cx", 9)
+        .attr("cy", 72)
+        .attr("r", 4)
         .attr("fill", "#e74c3c")
-        .attr("stroke", "#c0392b");
+        .attr("stroke", "#c0392b")
+        .attr("stroke-width", 1.5);
       legend
         .append("text")
-        .attr("x", 20)
-        .attr("y", 70)
+        .attr("x", 24)
+        .attr("y", 76)
         .text("Outliers")
-        .style("font-size", "11px");
+        .style("font-size", "12px")
+        .style("font-weight", "500")
+        .style("fill", "#2c3e50");
 
-      // Info text
+      // Info text with enhanced styling
       container
         .append("p")
         .style("text-align", "center")
-        .style("color", "#666")
-        .style("font-size", "13px")
+        .style("color", "#555")
+        .style("font-size", "14px")
+        .style("font-family", "Arial, sans-serif")
+        .style("margin-top", "15px")
+        .style("padding", "10px")
+        .style("background", "rgba(255, 255, 255, 0.7)")
+        .style("border-radius", "6px")
+        .style("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
         .html(
-          "<em>Données normalisées avec Z-score (moyenne=0, écart-type=1). Whiskers: 1.5×IQR</em>"
+          "<em><strong>ℹ️ Info:</strong> Données normalisées avec Z-score (moyenne=0, écart-type=1). Whiskers: 1.5×IQR</em>"
         );
     })
     .catch((err) => {
