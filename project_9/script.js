@@ -1,190 +1,296 @@
-window.onload = function () {
-  // Container fallback
-  let container = d3.select("#chart");
-  if (container.empty()) container = d3.select("#visualization");
-  if (container.empty()) container = d3.select("body");
+function main(container) {
+  // Accept either a DOM element or a selector string
+  const sel =
+    typeof container === "string"
+      ? d3.select(container)
+      : d3.select(container || document.body);
 
-  const width = 960;
-  const height = 600;
+  const width = 1200;
+  const height = 700;
 
-  // Create SVG
-  const svg = container
+  // remove existing SVG/tooltip if re-running
+  sel.selectAll("svg").remove();
+  sel.selectAll(".treemap-tooltip").remove();
+
+  // 1. Init SVG container with background gradient
+  const svg = sel
     .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .style("font-family", "Arial, sans-serif");
+    .style("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)")
+    .style("border-radius", "8px");
 
-  // Tooltip
-  const tooltip = container
+  // Add defs for gradients
+  const defs = svg.append("defs");
+
+  // Create a subtle glow filter
+  const filter = defs.append("filter").attr("id", "glow");
+  filter
+    .append("feGaussianBlur")
+    .attr("stdDeviation", "2")
+    .attr("result", "coloredBlur");
+  const feMerge = filter.append("feMerge");
+  feMerge.append("feMergeNode").attr("in", "coloredBlur");
+  feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+  const tooltip = sel
     .append("div")
     .attr("class", "treemap-tooltip")
     .style("position", "absolute")
+    .style("background", "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)")
+    .style("color", "white")
+    .style("border", "none")
+    .style("border-radius", "12px")
+    .style("padding", "14px 18px")
+    .style(
+      "box-shadow",
+      "0 10px 40px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)"
+    )
+    .style("font-family", "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif")
+    .style("font-size", "13px")
+    .style("line-height", "1.6")
+    .style("opacity", 0)
     .style("pointer-events", "none")
-    .style("background", "rgba(0,0,0,0.8)")
-    .style("color", "#fff")
-    .style("padding", "8px 10px")
-    .style("border-radius", "4px")
-    .style("font-size", "12px")
-    .style("opacity", 0);
+    .style("transition", "opacity 0.2s ease");
 
-  // Generic grouping keys (order matters). Default: roast -> loc_country
-  const groupKeys = ["roast", "loc_country"];
-  // colorScale declared in outer scope so renderNode can reference it before assignment
-  let colorScale;
-
-  // Helper: safe accessor for a key, maps null/empty to 'Unknown'
-  const accessorFor = (key) => (d) => {
-    let v = d[key];
-    if (v === null || v === undefined) return "Unknown";
-    v = String(v).trim();
-    return v === "" ? "Unknown" : v;
-  };
-
-  // Convert a nested d3.group (Map) into {name, children[]} structure recursively
-  function groupMapToChildren(map) {
-    const children = [];
-    if (map instanceof Map) {
-      for (const [k, v] of map) {
-        if (v instanceof Map) {
-          children.push({ name: k, children: groupMapToChildren(v) });
-        } else if (Array.isArray(v)) {
-          // leaf array -> count
-          children.push({ name: k, value: v.length });
-        } else {
-          // unexpected leaf
-          children.push({ name: k, value: v });
-        }
-      }
-    }
-    return children;
-  }
-
-  // Build hierarchy data from rows and groupKeys (generic)
-  function buildHierarchy(rows, keys) {
-    const accessors = keys.map((k) => accessorFor(k));
-    const grouped = d3.group(rows, ...accessors);
-    const root = { name: "root", children: groupMapToChildren(grouped) };
-    return root;
-  }
-
-  // Recursive renderer for treemap nodes
-  function renderNode(node, parentG) {
-    const g = parentG
-      .append("g")
-      .attr("class", "node")
-      .attr("transform", `translate(${node.x0},${node.y0})`);
-
-    const w = Math.max(0, node.x1 - node.x0);
-    const h = Math.max(0, node.y1 - node.y0);
-
-    const rect = g
-      .append("rect")
-      .attr("width", w)
-      .attr("height", h)
-      .attr("fill", () => {
-        // color by top-level ancestor (roast)
-        let ancestor = node;
-        while (ancestor.parent && ancestor.depth > 1)
-          ancestor = ancestor.parent;
-        const key = ancestor.depth === 1 ? ancestor.data.name : node.data.name;
-        return colorScale(ancestor.data.name || key);
-      })
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 1)
-      .style("cursor", "pointer")
-      .on("mouseover", function (event, d) {
-        d3.select(this).attr("stroke", "#000").attr("stroke-width", 2);
-        tooltip.style("opacity", 1);
-      })
-      .on("mousemove", function (event) {
-        tooltip
-          .style("left", event.pageX + 10 + "px")
-          .style("top", event.pageY + 10 + "px");
-      })
-      .on("mouseout", function () {
-        d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1);
-        tooltip.style("opacity", 0);
-      })
-      .on("mouseenter", function (event, d) {
-        // set tooltip content on enter using node data
-        const nodeData = node.data;
-        const value = node.value || 0;
-        const path = node
-          .ancestors()
-          .reverse()
-          .map((n) => n.data.name)
-          .slice(1)
-          .join(" → ");
-        tooltip
-          .html(
-            `<strong>${nodeData.name}</strong><br/>path: ${path}<br/>value: ${value}`
-          )
-          .style("opacity", 1);
-      });
-
-    // Label if large enough
-    if (w > 60 && h > 18) {
-      g.append("text")
-        .attr("x", 4)
-        .attr("y", 14)
-        .style("font-size", "11px")
-        .style("fill", "#0b2533")
-        .text(() => {
-          return node.data.name + (node.value ? ` (${node.value})` : "");
-        });
-    }
-
-    // Recurse for children
-    if (node.children) {
-      node.children.forEach((child) => renderNode(child, parentG));
-    }
-  }
-
-  // Load CSV and build treemap
   d3.csv("../data/coffee_analysis.csv")
-    .then((rows) => {
-      // Clean rows minimally
-      rows.forEach((d) => {
-        // ensure keys exist
-        groupKeys.forEach((k) => {
-          if (d[k] === undefined || d[k] === null || String(d[k]).trim() === "")
-            d[k] = "Unknown";
-          else d[k] = String(d[k]).trim();
-        });
+    .then((data) => {
+      
+      data.forEach((d) => {
+        if (!d.roast || String(d.roast).trim() === "") d.roast = "Unknown";
+        if (!d.loc_country || String(d.loc_country).trim() === "")
+          d.loc_country = "Unknown";
       });
 
-      const hierarchyData = buildHierarchy(rows, groupKeys);
+      const nestedData = d3.group(
+        data,
+        (d) => d.roast,
+        (d) => d.loc_country
+      );
+
+      // build hierarchy
+      const hierarchyData = {
+        name: "root",
+        children: Array.from(nestedData, ([key, value]) => ({
+          name: key,
+          children: Array.from(value, ([subKey, subValues]) => ({
+            name: subKey,
+            value: subValues.length,
+          })),
+        })),
+      };
 
       const root = d3
         .hierarchy(hierarchyData)
-        .sum((d) => (d.value ? d.value : 0))
+        .sum((d) => d.value)
         .sort((a, b) => b.value - a.value);
 
-      d3.treemap().size([width, height]).paddingInner(2)(root);
+      const treemap = d3
+        .treemap()
+        .size([width, height])
+        .paddingInner(3)
+        .paddingOuter(4)
+        .round(true);
+      treemap(root);
 
-      // color scale based on top-level groups
-      const topNames = root.children
+      // Coffee-themed warm color palette for roasts
+      const roastNames = root.children
         ? root.children.map((d) => d.data.name)
         : ["Unknown"];
-      // assign colorScale (outer-scoped)
-      colorScale = d3.scaleOrdinal().domain(topNames).range(d3.schemeTableau10);
+      const coffeeColors = [
+        "#8B4513", // SaddleBrown
+        "#D2691E", // Chocolate
+        "#CD853F", // Peru
+        "#DEB887",
+        "#F4A460",
+        "#DAA520",
+        "#B8860B",
+        "#A0522D",
+        "#6B4423",
+        "#8B7355",
+      ];
+      const roastColor = d3
+        .scaleOrdinal()
+        .domain(roastNames)
+        .range(coffeeColors);
 
-      // Render recursively starting from root (skip root itself)
-      root.children && root.children.forEach((child) => renderNode(child, svg));
+      // Vibrant colors for countries
+      const countryColor = d3.scaleOrdinal(d3.schemePaired);
 
-      // Title
+      // Draw group frames (roast)
+      const groups = svg
+        .selectAll("g.roast-group")
+        .data(root.children || [])
+        .enter()
+        .append("g")
+        .attr("class", "roast-group");
+
+      groups
+        .append("rect")
+        .attr("class", "roast-rect")
+        .attr("x", (d) => d.x0)
+        .attr("y", (d) => d.y0)
+        .attr("width", (d) => Math.max(0, d.x1 - d.x0))
+        .attr("height", (d) => Math.max(0, d.y1 - d.y0))
+        .attr("fill", "none")
+        .attr("stroke", (d) => roastColor(d.data.name))
+        .attr("stroke-width", 3)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .style("cursor", "pointer")
+        .style("transition", "all 0.3s ease")
+        .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.1))")
+        .on("mouseover", function (event, d) {
+          const countryCount = d.children ? d.children.length : 0;
+          const totalRecords = d.value || 0;
+          const grandTotal = root.value || 1;
+          const percentage = ((totalRecords / grandTotal) * 100).toFixed(1);
+
+          tooltip
+            .style("opacity", 0.95)
+            .html(
+              `<div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">${
+                d.data.name
+              } Roast</div>
+               <div style="font-size: 12px; opacity: 0.9;">${countryCount} ${
+                countryCount === 1 ? "Country" : "Countries"
+              }</div>
+               <div style="font-size: 12px; opacity: 0.9;">${percentage}% of Total</div>`
+            )
+            .style("left", `${event.pageX + 15}px`)
+            .style("top", `${event.pageY - 10}px`);
+
+          // highlight with glow
+          d3.select(this)
+            .attr("stroke", "#FFD700")
+            .attr("stroke-width", 5)
+            .style("filter", "drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))");
+          svg
+            .selectAll("rect.country-rect")
+            .filter((node) => node.parent === d)
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("opacity", 1);
+
+          svg
+            .selectAll("rect.country-rect")
+            .filter((node) => node.parent !== d)
+            .attr("opacity", 0.3);
+        })
+        .on("mousemove", function (event) {
+          tooltip
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY + 10}px`);
+        })
+        .on("mouseout", function (event, d) {
+          tooltip.style("opacity", 0);
+          d3.select(this)
+            .attr("stroke", roastColor(d.data.name))
+            .attr("stroke-width", 3)
+            .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.1))");
+          svg
+            .selectAll("rect.country-rect")
+            .attr("stroke", null)
+            .attr("opacity", 1);
+        });
+
+      // Draw country rectangles (leaves)
+      const nodes = root.leaves();
+
+      svg
+        .selectAll("rect.country-rect")
+        .data(nodes)
+        .enter()
+        .append("rect")
+        .attr("class", "country-rect")
+        .attr("x", (d) => d.x0)
+        .attr("y", (d) => d.y0)
+        .attr("width", (d) => Math.max(0, d.x1 - d.x0))
+        .attr("height", (d) => Math.max(0, d.y1 - d.y0))
+        .attr("fill", (d) => countryColor(d.data.name))
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .style("cursor", "pointer")
+        .style("transition", "all 0.2s ease")
+        .style("opacity", 0.9)
+        .on("mouseover", function (event, d) {
+          event.stopPropagation();
+          const parentTotal = d.parent.value || 1;
+          const percentage = ((d.value / parentTotal) * 100).toFixed(1);
+
+          tooltip
+            .style("opacity", 0.95)
+            .html(
+              `<div style="font-size: 15px; font-weight: 600; margin-bottom: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">${d.data.name}</div>
+               <div style="font-size: 12px; opacity: 0.9;">Roast: ${d.parent.data.name}</div>
+               <div style="font-size: 12px; opacity: 0.9;">${percentage}% of ${d.parent.data.name}</div>`
+            )
+            .style("left", `${event.pageX + 15}px`)
+            .style("top", `${event.pageY - 10}px`);
+          d3.select(this)
+            .attr("stroke", "#FFD700")
+            .attr("stroke-width", 3)
+            .style("opacity", 1)
+            .style("filter", "drop-shadow(0 4px 8px rgba(0,0,0,0.25))");
+        })
+        .on("mousemove", function (event) {
+          event.stopPropagation();
+          tooltip
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY + 10}px`);
+        })
+        .on("mouseout", function (event) {
+          event.stopPropagation();
+          tooltip.style("opacity", 0);
+          d3.select(this)
+            .attr("stroke", null)
+            .style("opacity", 0.9)
+            .style("filter", "none");
+        });
+
+      // Labels for sufficiently large nodes
+      svg
+        .selectAll("text.country-label")
+        .data(nodes.filter((d) => d.x1 - d.x0 > 50 && d.y1 - d.y0 > 25))
+        .enter()
+        .append("text")
+        .attr("class", "country-label")
+        .attr("x", (d) => d.x0 + (d.x1 - d.x0) / 2)
+        .attr("y", (d) => d.y0 + (d.y1 - d.y0) / 2)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("font-family", "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif")
+        .attr("font-size", "11px")
+        .attr("font-weight", "600")
+        .attr("fill", "white")
+        .style(
+          "text-shadow",
+          "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.5)"
+        )
+        .style("pointer-events", "none")
+        .text((d) => d.data.name);
+
+      // Add title
       svg
         .append("text")
         .attr("x", width / 2)
-        .attr("y", 18)
+        .attr("y", 30)
         .attr("text-anchor", "middle")
-        .style("font-size", "18px")
-        .style("font-weight", "700")
+        .attr("font-family", "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif")
+        .attr("font-size", "24px")
+        .attr("font-weight", "700")
+        .attr("fill", "#2c3e50")
+        .style("text-shadow", "0 2px 4px rgba(0,0,0,0.1)")
     })
     .catch((err) => {
-      container
-        .append("p")
-        .text("Error loading coffee_analysis.csv: " + err.message);
+      sel.append("p").text("Error loading coffee_analysis.csv: " + err.message);
       console.error(err);
     });
-};
+}
+
+// Run on element with id "container" if exists, otherwise try "chart", otherwise body
+const containerEl =
+  document.getElementById("container") ||
+  document.getElementById("chart") ||
+  document.body;
+main(containerEl);
