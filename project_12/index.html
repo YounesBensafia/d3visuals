@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project 12 : Correlogram Visualization</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+        background: #fefefe;
+      }
+      #chart {
+        margin: 20px auto;
+      }
+      #tooltip {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        pointer-events: none;
+        opacity: 0;
+        font-size: 13px;
+        transition: opacity 0.2s;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tooltip"></div>
+    <div id="chart"></div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
