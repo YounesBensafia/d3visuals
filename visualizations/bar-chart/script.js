@@ -1,5 +1,5 @@
 window.onload = function () {
-  const columns = 15; 
+  const columns = 15;
   const circleRadius = 24;
   const hSpacing = 80;
   const vSpacing = 75;
@@ -12,7 +12,7 @@ window.onload = function () {
     .attr("height", 400)
     .style("background-color", "white");
 
-  d3.csv("../data/named_colors_css.csv").then((data) => {
+  d3.csv("../../datasets//named_colors_css.csv").then((data) => {
     const n = data.length;
     const rows = Math.ceil(n / columns);
 
@@ -43,7 +43,7 @@ window.onload = function () {
       .attr("r", circleRadius)
       .style("fill", (d) => d.Hex)
       .style("stroke", "#000")
-      .style("stroke-width", 2)
+      .style("stroke-width", 2);
 
     items
       .append("text")

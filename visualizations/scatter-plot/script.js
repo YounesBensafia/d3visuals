@@ -1,5 +1,5 @@
 window.onload = function () {
-  d3.csv("./data/social_media_posts.csv").then((data) => {
+  d3.csv("./dataset/social_media_posts.csv").then((data) => {
     const svg = d3
       .select("#visualization")
       .append("svg")

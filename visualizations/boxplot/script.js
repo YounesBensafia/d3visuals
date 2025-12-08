@@ -21,7 +21,7 @@ window.onload = function () {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // Load abalone CSV from repo-level data folder
-  d3.csv("../data/abalone.csv")
+  d3.csv("../../datasets//abalone.csv")
     .then((rows) => {
       if (!rows || rows.length === 0) {
         container.append("p").text("No data found in abalone.csv");

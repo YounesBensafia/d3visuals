@@ -11,7 +11,7 @@ window.onload = function () {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  d3.csv("../data/random_data.csv").then((raw) => {
+  d3.csv("../../datasets//random_data.csv").then((raw) => {
     let data = raw
       .map((d, i) => ({ name: String(i + 1), value: +d.x }))
       .filter((d) => !isNaN(d.value));
@@ -27,7 +27,6 @@ window.onload = function () {
       .domain([0, d3.max(data, (d) => d.value)])
       .range([height, 0]);
 
-
     svg
       .append("g")
       .attr("class", "x-axis")
@@ -37,7 +36,8 @@ window.onload = function () {
     svg.append("g").attr("class", "y-axis").call(d3.axisLeft(y));
 
     // X Axis Label
-    svg.append("text")
+    svg
+      .append("text")
       .attr("class", "x label")
       .attr("text-anchor", "middle")
       .attr("x", width / 2)
@@ -47,7 +47,8 @@ window.onload = function () {
       .text("Index");
 
     // Y Axis Label
-    svg.append("text")
+    svg
+      .append("text")
       .attr("class", "y label")
       .attr("text-anchor", "middle")
       .attr("transform", `rotate(-90)`)

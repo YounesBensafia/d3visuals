@@ -22,8 +22,8 @@ window.onload = function () {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // helper: run local server if you open file:// (see checklist below)
-  // data file is located at repo root `data/titanic-data.csv`, from project_4 this is ../data/...
-  d3.csv("../data/titanic-data.csv")
+  // data file is located at repo root `dataset/titanic-data.csv`, from project_4 this is ../../datasets//...
+  d3.csv("../../datasets//titanic-data.csv")
     .then((raw) => {
       if (!raw || raw.length === 0) {
         console.error(

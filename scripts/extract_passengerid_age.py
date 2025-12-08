@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple script to extract PassengerId and Age from data/titanic-data.csv
-and write data/titanic_passengerid_age.csv with header `PassengerId,Age`.
+Simple script to extract PassengerId and Age from dataset/titanic-data.csv
+and write dataset/titanic_passengerid_age.csv with header `PassengerId,Age`.
 
 Usage:
   python3 scripts/extract_passengerid_age.py

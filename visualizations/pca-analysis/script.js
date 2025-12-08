@@ -1,5 +1,5 @@
 window.onload = function () {
-  const csvPath = "../data/glass.csv"; // relative to project_11/index.html
+  const csvPath = "../../datasets//glass.csv"; // relative to project_11/index.html
 
   // Feature columns to use for PCA
   const featureNames = ["RI", "Na", "Mg", "Al", "Si", "K", "Ca", "Ba", "Fe"];

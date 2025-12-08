@@ -53,7 +53,7 @@ function main(container) {
     .style("pointer-events", "none")
     .style("transition", "opacity 0.2s ease");
 
-  d3.csv("../data/coffee_analysis.csv")
+  d3.csv("../../datasets//coffee_analysis.csv")
     .then((data) => {
       data.forEach((d) => {
         // Extract year from review_date
@@ -301,7 +301,7 @@ function main(container) {
         .attr("font-size", "24px")
         .attr("font-weight", "700")
         .attr("fill", "#2c3e50")
-        .style("text-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+        .style("text-shadow", "0 2px 4px rgba(0,0,0,0.1)");
     })
     .catch((err) => {
       sel.append("p").text("Error loading coffee_analysis.csv: " + err.message);

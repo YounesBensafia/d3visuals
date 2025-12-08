@@ -11,7 +11,7 @@ window.onload = function () {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  d3.csv("../data/us-cities.csv").then((data) => {
+  d3.csv("../../datasets//us-cities.csv").then((data) => {
     data.forEach((d) => {
       d.population = +d.population;
       d.rank = +d.rank;

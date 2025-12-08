@@ -20,10 +20,10 @@ window.onload = function () {
     return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * t * t);
   }
 
-  const h = 3; 
+  const h = 3;
   const sampleLimit = 892;
 
-  d3.csv("../data/titanic-data.csv", (d) => ({
+  d3.csv("../../datasets//titanic-data.csv", (d) => ({
     Age: d.Age === "" || d.Age === undefined ? null : +d.Age,
     Gender: d.Gender ?? d.Sex,
   }))

@@ -1,5 +1,5 @@
 window.onload = function () {
-  const filePath = "../data/glass.csv"; // dataset
+  const filePath = "../../datasets//glass.csv"; // dataset
 
   const tooltip = d3.select("#tooltip");
 

@@ -12,7 +12,7 @@ window.onload = function () {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // load CSV from repo data folder (relative to project_5/index.html)
-  d3.csv("../data/titanic-data.csv")
+  d3.csv("../../datasets//titanic-data.csv")
     .then((data) => {
       console.log("Loaded rows:", data.length);
 
@@ -84,7 +84,7 @@ window.onload = function () {
         .text("Nombre de passagers");
     })
     .catch((err) => {
-      console.error("Failed to load CSV ../data/titanic-data.csv", err);
+      console.error("Failed to load CSV ../../datasets//titanic-data.csv", err);
       d3.select("body").append("p").text("Error loading CSV (see console).");
     });
 };
