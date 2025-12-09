@@ -1947,12 +1947,11 @@ d3.csv(
     )
     .map((minutes, i) => ({ year: data[i].year, minutes }));
 
-  const centeredMA = centeredMovingAverage(data, 7);
+  const centeredMA = centeredMovingAverage(data, 5);
   const oneSidedMA = oneSidedMovingAverage(data, 7);
   const gaussianSmooth = gaussianKernelSmoothing(data);
   const doubleExpSmooth = doubleExponentialSmoothing(data, 0.2, 0.1);
 
-  // Create scales
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(data, (d) => d.year))
