@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Algeria Map - Wilayas</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f4f8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 30px;
+        font-size: 16px;
+      }
+
+      #map {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      .wilaya {
+        stroke: #2c3e50;
+        stroke-width: 0.5;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .wilaya:hover {
+        stroke: #e74c3c;
+        stroke-width: 2;
+        filter: brightness(0.9);
+      }
+
+      .tooltip {
+        position: absolute;
+        text-align: center;
+        padding: 12px 16px;
+        font-size: 14px;
+        background: rgba(44, 62, 80, 0.95);
+        color: white;
+        border-radius: 8px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .tooltip.show {
+        opacity: 1;
+      }
+
+      .legend {
+        margin-top: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: left;
+      }
+
+      .legend-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin: 5px 0;
+        font-size: 12px;
+      }
+
+      .legend-color {
+        width: 30px;
+        height: 15px;
+        margin-right: 8px;
+        border-radius: 3px;
+        border: 1px solid #bdc3c7;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Algeria Map</h1>
+    <p class="subtitle">48 Wilayas (Provinces)</p>
+    <div id="map"></div>
+    <div class="legend">
+      <div class="legend-title">Regions</div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #3498db"></div>
+        <span>Northern Wilayas</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #2ecc71"></div>
+        <span>High Plateaus</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #f39c12"></div>
+        <span>Saharan Wilayas</span>
+      </div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
