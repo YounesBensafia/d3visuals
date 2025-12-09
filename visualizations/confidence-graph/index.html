@@ -3,216 +3,329 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boston Marathon - Linear Regression with Confidence Bands</title>
+    <title>Boston Marathon Regression Analysis</title>
+
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.6/dist/jstat.min.js"></script>
+
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-        min-height: 100vh;
-        padding: 20px;
+        font-family: sans-serif;
+        margin: 20px;
       }
 
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-
-      .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 25px 30px;
-        text-align: center;
-      }
-
-      .header h1 {
-        font-size: 1.8em;
-        font-weight: 600;
-        margin-bottom: 8px;
-      }
-
-      .header p {
-        font-size: 0.95em;
-        opacity: 0.95;
-      }
-
-      .content {
-        padding: 30px;
-      }
-
-      .controls {
+      .chart-container {
         display: flex;
         justify-content: center;
-        gap: 20px;
-        margin-bottom: 20px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
       }
 
-      .control-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .control-group label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #495057;
-      }
-
-      .control-group select,
-      .control-group input {
-        padding: 6px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 14px;
-        background: white;
-      }
-
-      #visualization {
-        display: block;
-        margin: 0 auto;
-      }
-
+      /* Axis styling */
       .axis path,
       .axis line {
-        fill: none;
-        stroke: #adb5bd;
-        shape-rendering: crispEdges;
-        stroke-width: 1.5px;
+        stroke: #000;
       }
 
-      .axis text {
-        font-size: 11px;
-        fill: #495057;
+      /* Data points */
+      .dot {
+        fill: steelblue;
+        opacity: 0.5;
       }
 
-      .axis-label {
-        font-size: 13px;
-        fill: #212529;
-        font-weight: 600;
-      }
-
-      .grid line {
-        stroke: #e9ecef;
-        stroke-opacity: 0.7;
-        stroke-dasharray: 2, 2;
-      }
-
-      .grid path {
-        stroke-width: 0;
-      }
-
-      .data-point {
-        fill: #495057;
-        opacity: 0.6;
-      }
-
+      /* Regression Line */
       .regression-line {
         fill: none;
-        stroke: #3498db;
-        stroke-width: 3px;
+        stroke: #ff4500;
+        stroke-width: 2px;
       }
 
-      .confidence-band {
-        fill: #9b59b6;
-        opacity: 0.25;
+      /* Confidence Bands */
+      /* We use opacity to create the "graded" look.
+           When they stack (99% on bottom, 80% on top),
+           the middle becomes darkest naturally. */
+      .band-99 {
+        fill: #6a0dad;
+        opacity: 0.15;
+        stroke: none;
       }
 
-      .prediction-band {
-        fill: #e74c3c;
-        opacity: 0.2;
+      .band-95 {
+        fill: #6a0dad;
+        opacity: 0.15;
+        stroke: none;
       }
 
-      .legend {
-        display: flex;
-        justify-content: center;
-        gap: 25px;
-        margin-top: 20px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        flex-wrap: wrap;
+      .band-80 {
+        fill: #d32f2f;
+        opacity: 0.15;
+        stroke: none;
       }
 
-      .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .legend-symbol {
-        width: 30px;
-        height: 3px;
-        background: #dc3545;
-      }
-
-      .legend-symbol.band {
-        height: 15px;
-        width: 30px;
-      }
-
-      .legend-text {
-        font-size: 13px;
-        color: #212529;
-        font-weight: 500;
-      }
-
-      .stats-box {
-        margin-top: 20px;
-        padding: 15px;
-        background: #e7f5ff;
-        border-left: 4px solid #339af0;
-        border-radius: 4px;
-        font-size: 13px;
-        line-height: 1.8;
-        color: #1864ab;
-      }
-
-      .stats-box strong {
-        color: #0c4a6e;
-      }
-
-      .tooltip {
-        position: absolute;
-        background: rgba(33, 37, 41, 0.95);
-        color: white;
-        padding: 10px 14px;
-        border-radius: 6px;
+      .label {
         font-size: 12px;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.2s;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-      }
-
-      .tooltip.visible {
-        opacity: 1;
+        fill: #333;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="content">
-        <svg id="visualization"></svg>
-      </div>
-    </div>
+    <h2 style="text-align: center">Boston Marathon Winning Times</h2>
+    <p style="text-align: center">Graded Confidence Bands (80%, 95%, 99%)</p>
 
-    <div class="tooltip"></div>
+    <div class="chart-container" id="chart"></div>
 
-    <script src="./script.js"></script>
+    <script>
+      // 1. Setup dimensions
+      const margin = { top: 40, right: 150, bottom: 60, left: 60 }, // Increased right margin for legend
+        width = 900 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+      // Append SVG object
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // 2. Load Data
+      d3.csv(
+        "../../datasets/Boston_marathon_winning_times_since_1897_768_87.csv"
+      )
+        .then(function (data) {
+          // Parse data
+          data.forEach((d) => {
+            d.time = +d.time; // Year
+            d.value = +d.value; // Winning Time
+          });
+
+          const n = data.length;
+
+          // 3. Define Scales
+          const xMin = d3.min(data, (d) => d.time);
+          const xMax = d3.max(data, (d) => d.time);
+          const yMin = d3.min(data, (d) => d.value);
+          const yMax = d3.max(data, (d) => d.value);
+
+          const xScale = d3
+            .scaleLinear()
+            .domain([xMin-1, xMax])
+            .range([0, width]);
+          const yScale = d3
+            .scaleLinear()
+            .domain([yMin, yMax])
+            .range([height, 0]);
+
+          // 4. OLS Linear Regression
+          const xMean = d3.mean(data, (d) => d.time);
+          const yMean = d3.mean(data, (d) => d.value);
+
+          let SSxx = 0,
+            SSxy = 0,
+            SSE = 0;
+
+          // Calculate sums
+          data.forEach((d) => {
+            SSxx += Math.pow(d.time - xMean, 2);
+            SSxy += (d.time - xMean) * (d.value - yMean);
+          });
+
+          // Calculate Slope and Intercept
+          const slope = SSxy / SSxx;
+          const intercept = yMean - slope * xMean;
+
+          // Calculate Residuals for MSE
+          data.forEach((d) => {
+            const yPred = intercept + slope * d.time;
+            SSE += Math.pow(d.value - yPred, 2);
+          });
+
+          const meanSquareError = SSE / (n - 2);
+
+          // 5. Calculate Graded Bands (99%, 95%, 80%)
+          // We draw them from widest (99%) to narrowest (80%) so they layer correctly.
+          const confidenceLevels = [
+            { level: 0.99, class: "band-99", label: "99% CI" },
+            { level: 0.95, class: "band-95", label: "95% CI" },
+            { level: 0.8, class: "band-80", label: "80% CI" },
+          ];
+
+          const regressionData = [];
+          const step = 1;
+
+          // Calculate band boundaries extending slightly beyond data range for full coverage
+          for (let x = xMin - 1; x <= xMax + 1; x += step) {
+            const yHat = intercept + slope * x;
+
+            // Standard Error of the Estimate at specific X
+            const distFromMean = Math.pow(x - xMean, 2);
+            const standardError = Math.sqrt(
+              meanSquareError * (1 / n + distFromMean / SSxx)
+            );
+
+            const point = { x: x, yHat: yHat };
+
+            // Calculate upper/lower bounds for each confidence level
+            confidenceLevels.forEach((conf) => {
+              // For a 95% CI, alpha is 0.05, and we want the critical value at 1 - 0.025 = 0.975
+              const alpha = 1 - conf.level;
+              const tScore = jStat.studentt.inv(1 - alpha / 2, n - 2);
+              const margin = tScore * standardError;
+
+              point[`lower_${conf.level}`] = yHat - margin;
+              point[`upper_${conf.level}`] = yHat + margin;
+            });
+
+            regressionData.push(point);
+          }
+
+          // 6. Draw Chart Elements
+
+          // X Axis
+          svg
+            .append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+          // Y Axis
+          svg.append("g").call(d3.axisLeft(yScale));
+
+          // Axis Labels
+          svg
+            .append("text")
+            .attr("text-anchor", "middle")
+            .attr("x", width / 2)
+            .attr("y", height + 40)
+            .text("Year");
+
+          svg
+            .append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -40)
+            .attr("x", -height / 2)
+            .text("Winning Time (Minutes)");
+
+          // Draw Bands (Loop)
+          // Draw widest first so narrower ones sit on top
+          confidenceLevels.forEach((conf) => {
+            svg
+              .append("path")
+              .datum(regressionData)
+              .attr("class", conf.class)
+              .attr(
+                "d",
+                d3
+                  .area()
+                  .x((d) => xScale(d.x))
+                  .y0((d) => yScale(d[`lower_${conf.level}`]))
+                  .y1((d) => yScale(d[`upper_${conf.level}`]))
+              );
+          });
+
+          // Draw Regression Line
+          svg
+            .append("path")
+            .datum(regressionData)
+            .attr("class", "regression-line")
+            .attr(
+              "d",
+              d3
+                .line()
+                .x((d) => xScale(d.x))
+                .y((d) => yScale(d.yHat))
+            );
+
+          // Draw Scatter Points
+          svg
+            .selectAll(".dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", "dot")
+            .attr("cx", (d) => xScale(d.time))
+            .attr("cy", (d) => yScale(d.value))
+            .attr("r", 3)
+            .on("mouseover", function () {
+              d3.select(this).attr("r", 6).style("fill", "orange");
+            })
+            .on("mouseout", function () {
+              d3.select(this).attr("r", 3).style("fill", "steelblue");
+            });
+
+          // 7. Legend
+          const legend = svg
+            .append("g")
+            .attr("transform", `translate(${width + 20}, 20)`);
+
+          legend
+            .append("text")
+            .attr("x", 0)
+            .attr("y", 0)
+            .text("Legend")
+            .style("font-weight", "bold");
+
+          // Data Dot
+          legend
+            .append("circle")
+            .attr("cx", 5)
+            .attr("cy", 20)
+            .attr("r", 4)
+            .style("fill", "steelblue");
+          legend
+            .append("text")
+            .attr("x", 15)
+            .attr("y", 24)
+            .text("Data")
+            .style("font-size", "12px");
+
+          // Trend Line
+          legend
+            .append("line")
+            .attr("x1", 0)
+            .attr("y1", 40)
+            .attr("x2", 10)
+            .attr("y2", 40)
+            .style("stroke", "#FF4500")
+            .style("stroke-width", 2);
+          legend
+            .append("text")
+            .attr("x", 15)
+            .attr("y", 44)
+            .text("Trend Line")
+            .style("font-size", "12px");
+
+          // Bands Legend
+          let yPos = 65;
+          confidenceLevels.forEach((conf) => {
+            legend
+              .append("rect")
+              .attr("x", 0)
+              .attr("y", yPos)
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("class", conf.class)
+              .style("opacity", 0.4);
+
+            legend
+              .append("text")
+              .attr("x", 15)
+              .attr("y", yPos + 9)
+              .text(conf.label)
+              .style("font-size", "12px");
+
+            yPos += 20;
+          });
+        })
+        .catch(function (error) {
+          console.log(
+            "Error loading file. Ensure you are running a local server."
+          );
+          console.error(error);
+          d3.select("#chart")
+            .append("p")
+            .style("color", "red")
+            .text("Error loading CSV. Check console.");
+        });
+    </script>
   </body>
 </html>
