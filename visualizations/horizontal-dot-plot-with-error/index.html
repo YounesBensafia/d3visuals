@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Iris Dataset - Horizontal Dot Plot with Error Bars</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -195,11 +196,6 @@
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <h1>Iris Dataset Analysis</h1>
-        <p>Horizontal Dot Plot with Mean and Standard Deviation Error Bars</p>
-      </div>
-
       <div class="content">
         <div class="controls">
           <div class="control-group">
@@ -216,12 +212,6 @@
         <svg id="visualization"></svg>
 
         <div class="legend" id="legend"></div>
-
-        <div class="info-box">
-          <strong>About:</strong> This visualization shows the mean value (dot)
-          and standard deviation (error bars) for each iris species. The
-          horizontal bars represent ±1 standard deviation from the mean.
-        </div>
       </div>
     </div>
 
