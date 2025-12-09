@@ -3,40 +3,584 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boston Marathon Winning Times - Time Series</title>
+    <title>Boston Marathon Winning Times - Time Series Analysis</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
+      * {
         margin: 0;
-        padding: 20px;
-        background-color: #f5f5f5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
         min-height: 100vh;
+        padding: 20px;
       }
-      svg {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
       }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        font-size: 0.95em;
+        opacity: 0.95;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 250px;
+        gap: 0;
+      }
+
+      .chart-area {
+        padding: 30px;
+        background: #ffffff;
+      }
+
+      .sidebar {
+        background: #f8f9fa;
+        padding: 30px 20px;
+        border-left: 1px solid #e9ecef;
+      }
+
+      .sidebar h3 {
+        font-size: 1em;
+        color: #495057;
+        margin-bottom: 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      #visualization {
+        display: block;
+      }
+
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #adb5bd;
+        shape-rendering: crispEdges;
+        stroke-width: 1.5px;
+      }
+
+      .axis text {
+        font-size: 11px;
+        fill: #495057;
+      }
+
+      .axis-label {
+        font-size: 13px;
+        fill: #212529;
+        font-weight: 600;
+      }
+
       .grid line {
-        stroke: #ddd;
+        stroke: #e9ecef;
+        stroke-opacity: 0.7;
+        stroke-dasharray: 2, 2;
       }
+
       .grid path {
         stroke-width: 0;
       }
-      .legend {
-        cursor: default;
+
+      .line {
+        fill: none;
+        stroke-width: 2.5px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: stroke-width 0.2s ease;
       }
-      .legend text {
-        font-family: Arial, sans-serif;
+
+      .line:hover {
+        stroke-width: 4px;
+      }
+
+      .raw-data-dot {
+        fill: #495057;
+        opacity: 0.5;
+        transition: all 0.2s ease;
+      }
+
+      .raw-data-dot:hover {
+        opacity: 1;
+        r: 5;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        border: 1px solid #dee2e6;
+      }
+
+      .legend-item:hover {
+        background: #f1f3f5;
+        border-color: #adb5bd;
+        transform: translateX(3px);
+      }
+
+      .legend-item.inactive {
+        opacity: 0.4;
+      }
+
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        margin-right: 10px;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .legend-text {
+        font-size: 12px;
+        color: #212529;
+        font-weight: 500;
+      }
+
+      .info-box {
+        margin-top: 20px;
+        padding: 12px;
+        background: #e7f5ff;
+        border-left: 3px solid #339af0;
+        border-radius: 4px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #1864ab;
+      }
+
+      .tooltip {
+        position: absolute;
+        background: rgba(33, 37, 41, 0.95);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+      }
+
+      .tooltip.visible {
+        opacity: 1;
+      }
+
+      @media (max-width: 968px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-left: none;
+          border-top: 1px solid #e9ecef;
+        }
+
+        .header h1 {
+          font-size: 1.5em;
+        }
       }
     </style>
   </head>
   <body>
-    <div id="container"></div>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="./script.js"></script>
+    <div class="container">
+
+
+      <div class="content">
+        <div class="chart-area">
+          <svg id="visualization"></svg>
+        </div>
+
+        <div class="sidebar">
+          <h3>Legend</h3>
+          <div id="legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tooltip"></div>
+
+    <script>
+      const dataFile =
+        "../../datasets/Boston_marathon_winning_times_since_1897_768_87.csv";
+      const windowSize = 5;
+      const alpha = 0.4; // Smoothing factor for Level (L)
+      const beta = 0.3; // Smoothing factor for Trend (B)
+      const bandwidth = (windowSize - 1) / 4;
+
+      const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+      const width = 850 - margin.left - margin.right;
+      const height = 500 - margin.top - margin.bottom;
+
+      // Color scale for the different lines
+      const color = d3
+        .scaleOrdinal()
+        .domain([
+          "Raw Data",
+          "LOWESS",
+          "Centered Moving Average",
+          "One-sided Moving Average",
+          "Gaussian Kernel Smoothing",
+          "Double Exponential Smoothing",
+        ])
+        .range([
+          "#333333",
+          "#e41a1c",
+          "#377eb8",
+          "#4daf4a",
+          "#984ea3",
+          "#ff7f00",
+        ]);
+
+      // --- 2. SMOOTHING ALGORITHMS IMPLEMENTATION ---
+
+      // LOWESS (Locally Weighted Scatterplot Smoothing)
+      function lowess(data, frac) {
+        const dataLength = data.length;
+        const smoothed = [];
+        const k = Math.floor(dataLength * frac);
+
+        for (let i = 0; i < dataLength; i++) {
+          const xi = data[i].time;
+          const distances = [];
+
+          for (let j = 0; j < dataLength; j++) {
+            distances[j] = Math.abs(data[j].time - xi);
+          }
+
+          const indices = distances
+            .map((d, index) => ({ d, index }))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, k)
+            .map((item) => item.index);
+
+          const dk = distances[indices[k - 1]];
+
+          let sum_w = 0;
+          let sum_wx = 0;
+          let sum_wxx = 0;
+          let sum_wy = 0;
+          let sum_wxy = 0;
+
+          for (const idx of indices) {
+            const x = data[idx].time;
+            const y = data[idx].value;
+            const h = distances[idx] / dk;
+            const w = Math.pow(1 - Math.pow(h, 3), 3);
+
+            sum_w += w;
+            sum_wx += w * x;
+            sum_wxx += w * x * x;
+            sum_wy += w * y;
+            sum_wxy += w * x * y;
+          }
+
+          const det = sum_w * sum_wxx - sum_wx * sum_wx;
+
+          if (det === 0) {
+            smoothed[i] = { time: xi, value: data[i].value };
+            continue;
+          }
+
+          const A = (sum_wxx * sum_wy - sum_wx * sum_wxy) / det;
+          const B = (sum_w * sum_wxy - sum_wx * sum_wy) / det;
+
+          smoothed[i] = { time: xi, value: A + B * xi };
+        }
+        return smoothed;
+      }
+
+      // Moving Average (Centered and One-sided)
+      function movingAverage(data, size, type) {
+        return data.map((d, i) => {
+          let sum = 0;
+          let count = 0;
+          let start, end;
+
+          if (type === "centered") {
+            const half = Math.floor(size / 2);
+            start = Math.max(0, i - half);
+            end = Math.min(data.length - 1, i + half);
+          } else if (type === "one-sided") {
+            start = Math.max(0, i - size + 1);
+            end = i;
+          } else {
+            return { time: d.time, value: d.value };
+          }
+
+          for (let j = start; j <= end; j++) {
+            sum += data[j].value;
+            count++;
+          }
+
+          return { time: d.time, value: sum / count };
+        });
+      }
+
+      // Gaussian Kernel Smoothing
+      function gaussianKernelSmoothing(data, bandwidth) {
+        const kernel = (distance) => {
+          const u = distance / bandwidth;
+          return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * u * u);
+        };
+
+        return data.map((d, i) => {
+          let sum_weighted_value = 0;
+          let sum_weight = 0;
+
+          for (let j = 0; j < data.length; j++) {
+            const distance = Math.abs(data[j].time - d.time);
+            const weight = kernel(distance);
+
+            sum_weighted_value += weight * data[j].value;
+            sum_weight += weight;
+          }
+
+          return { time: d.time, value: sum_weighted_value / sum_weight };
+        });
+      }
+
+      // Double Exponential Smoothing (L-Only and Lag-Adjusted)
+      function doubleExponentialSmoothing(data, alpha, beta) {
+        // Initialize L0 and B0
+        let Lt = data[0].value;
+        let Bt = data[1].value - data[0].value;
+        const smoothed = [];
+
+        // Start the smoothed line with L0, plotted at the time of the second point (t1)
+        // This shifts the start of the line forward, minimizing decalage.
+        smoothed.push({ time: data[1].time, value: Lt });
+
+        for (let i = 1; i < data.length; i++) {
+          const Yt = data[i].value;
+          const prevL = Lt;
+          const prevB = Bt;
+
+          // Level equation
+          Lt = alpha * Yt + (1 - alpha) * (prevL + prevB);
+
+          // Trend equation
+          Bt = beta * (Lt - prevL) + (1 - beta) * prevB;
+
+          // *** CRITICAL STEP: Plot the calculated L_t at the NEXT time index. ***
+          if (i < data.length - 1) {
+            // Plot L_t (the value) at data[i + 1].time (the advanced time)
+            smoothed.push({ time: data[i + 1].time, value: Lt });
+          } else {
+            // For the very last point, plot the last calculated L_t at the last data time (data[i].time).
+            smoothed.push({ time: data[i].time, value: Lt });
+          }
+        }
+
+        return smoothed;
+      }
+
+      // --- 3. D3 DATA LOADING AND VISUALIZATION ---
+
+      d3.csv(dataFile)
+        .then((raw_data) => {
+          // Data Transformation
+          const data = raw_data.map((d) => ({
+            time: +d.time,
+            value: +d.value,
+          }));
+
+          if (data.length === 0) {
+            console.error("Data is empty or failed to parse.");
+            return;
+          }
+
+          // Apply smoothing functions
+          const lowessData = lowess(data, 0.3);
+          const centeredMAData = movingAverage(data, windowSize, "centered");
+          const gaussianData = gaussianKernelSmoothing(data, bandwidth);
+
+          // One-sided Moving Average: Still use the slice method to remove initial bias.
+          const fullOneSidedMAData = movingAverage(
+            data,
+            windowSize,
+            "one-sided"
+          );
+          const oneSidedMAData = fullOneSidedMAData.slice(windowSize - 1);
+
+          // Double Exponential Smoothing: The function now plots L_t with time shift.
+          const doubleExpData = doubleExponentialSmoothing(data, alpha, beta);
+
+          // Structure data for D3 drawing
+          const allData = [
+            { name: "Raw Data", values: data },
+            { name: "LOWESS", values: lowessData },
+            { name: "Centered Moving Average", values: centeredMAData },
+            { name: "One-sided Moving Average", values: oneSidedMAData },
+            { name: "Gaussian Kernel Smoothing", values: gaussianData },
+            { name: "Double Exponential Smoothing", values: doubleExpData },
+          ];
+
+          drawChart(allData);
+        })
+        .catch((error) => {
+          console.error("Error loading or processing data:", error);
+          d3.select("body")
+            .append("p")
+            .text(
+              `Failed to load data: ${error.message}. Ensure '${dataFile}' is in the same directory.`
+            )
+            .style("color", "red");
+        });
+
+      function drawChart(allData) {
+        const svg = d3
+          .select("#visualization")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // 1. Define Scales
+        const x = d3
+          .scaleLinear()
+          .domain(d3.extent(allData[0].values, (d) => d.time))
+          .range([0, width]);
+
+        const y = d3.scaleLinear().domain([125, 175]).range([height, 0]);
+
+        // 2. Add Grid
+        svg
+          .append("g")
+          .attr("class", "grid")
+          .attr("transform", `translate(0,${height})`)
+          .call(d3.axisBottom(x).tickSize(-height).tickFormat(""));
+
+        svg
+          .append("g")
+          .attr("class", "grid")
+          .call(d3.axisLeft(y).tickSize(-width).tickFormat(""));
+
+        // 3. Define Axes
+        const xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
+        const yAxis = d3.axisLeft(y);
+
+        // Add X axis
+        svg
+          .append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(0,${height})`)
+          .call(xAxis);
+
+        // Add Y axis
+        svg.append("g").attr("class", "y axis").call(yAxis);
+
+        // Add Y axis label
+        svg
+          .append("text")
+          .attr("class", "axis-label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -45)
+          .attr("x", -height / 2)
+          .attr("text-anchor", "middle")
+          .text("Winning Time (Minutes)");
+
+        // Add X axis label
+        svg
+          .append("text")
+          .attr("class", "axis-label")
+          .attr("x", width / 2)
+          .attr("y", height + 40)
+          .attr("text-anchor", "middle")
+          .text("Year");
+
+        // 4. Define Line Generator
+        const line = d3
+          .line()
+          .x((d) => x(d.time))
+          .y((d) => y(d.value));
+
+        // 4. Draw Marks (Lines)
+        const lines = svg
+          .selectAll(".smoothing-line")
+          .data(allData)
+          .enter()
+          .append("g")
+          .attr("class", "smoothing-line");
+
+        lines
+          .append("path")
+          .attr("d", (d) => line(d.values))
+          .attr("class", "line")
+          .style("stroke", (d) => color(d.name))
+          .style("opacity", (d) => (d.name === "Raw Data" ? 0 : 1));
+
+        // Draw Dots for Raw Data
+        svg
+          .selectAll(".raw-data-dot")
+          .data(allData[0].values)
+          .enter()
+          .append("circle")
+          .attr("class", "raw-data-dot")
+          .attr("cx", (d) => x(d.time))
+          .attr("cy", (d) => y(d.value))
+          .attr("r", 3);
+
+        // 5. Add Legend
+        const legend = d3
+          .select("#legend")
+          .append("svg")
+          .attr("width", 300)
+          .attr("height", allData.length * 20)
+          .append("g")
+          .attr("transform", "translate(10, 0)");
+
+        const legendItems = legend
+          .selectAll(".legend-item")
+          .data(allData)
+          .enter()
+          .append("g")
+          .attr("class", "legend-item")
+          .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+        legendItems
+          .append("rect")
+          .attr("x", 0)
+          .attr("width", 18)
+          .attr("height", 18)
+          .style("fill", (d) => color(d.name));
+
+        legendItems
+          .append("text")
+          .attr("x", 24)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .style("text-anchor", "start")
+          .text((d) => d.name);
+      }
+    </script>
   </body>
 </html>
