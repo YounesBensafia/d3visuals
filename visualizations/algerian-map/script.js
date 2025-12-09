@@ -12,46 +12,85 @@ const svg = d3
 // Create tooltip
 const tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
+// Define colors for four regions
+const colors = {
+  NW: "#E8B4A8", // North West - Light pink/salmon
+  NE: "#A8D5BA", // North East - Light green/mint
+  SW: "#D4B4D8", // South West - Light purple
+  SE: "#7BA3C7", // South East - Blue
+};
+
 // Define color scale for different regions
 const getRegionColor = (wilayaName) => {
-  // Northern wilayas (coastal and Tell region)
-  const northern = [
-    "Alger",
-    "Oran",
-    "Annaba",
+  // North West
+  const NW = [
     "Tlemcen",
-    "Mostaganem",
-    "Skikda",
-    "Jijel",
-    "Béjaïa",
-    "Tipaza",
-    "Boumerdès",
     "Aïn Témouchent",
-    "El Tarf",
+    "Oran",
+    "Mostaganem",
     "Chlef",
-    "Tizi Ouzou",
+    "Relizane",
+    "Mascara",
+    "Sidi Bel Abbès",
+    "Saïda",
+    "Naâma",
+    "Tiaret",
+    "Tissemsilt",
+    "Aïn Defla",
+    "Tipaza",
     "Blida",
+    "Alger",
+    "Boumerdès",
   ];
 
-  // Saharan wilayas (desert region)
-  const saharan = [
-    "Adrar",
-    "Tamanghasset",
-    "Illizi",
-    "Ouargla",
-    "Ghardaïa",
-    "El Oued",
+  // North East
+  const NE = [
+    "Tizi Ouzou",
+    "Bouira",
+    "Médéa",
+    "Béjaïa",
+    "Bordj Bou Arréridj",
+    "Sétif",
+    "Jijel",
+    "Mila",
+    "Constantine",
+    "Skikda",
+    "Guelma",
+    "Annaba",
+    "El Tarf",
+    "Souk Ahras",
+    "Oum el Bouaghi",
+    "Batna",
+    "Khenchela",
+    "Tébessa",
+    "M'Sila",
+  ];
+
+  // South West
+  const SW = [
+    "El Bayadh",
     "Béchar",
     "Tindouf",
-    "Biskra",
+    "Adrar",
+    "Djelfa",
+    "Laghouat",
+    "Ghardaïa",
+    "Tamanghasset",
   ];
 
-  if (northern.some((name) => wilayaName.includes(name))) {
-    return "#3498db"; // Blue for northern
-  } else if (saharan.some((name) => wilayaName.includes(name))) {
-    return "#f39c12"; // Orange for Sahara
+  // South East
+  const SE = ["Biskra", "El Oued", "Ouargla", "Illizi"];
+
+  if (NW.some((name) => wilayaName.includes(name))) {
+    return colors.NW;
+  } else if (NE.some((name) => wilayaName.includes(name))) {
+    return colors.NE;
+  } else if (SW.some((name) => wilayaName.includes(name))) {
+    return colors.SW;
+  } else if (SE.some((name) => wilayaName.includes(name))) {
+    return colors.SE;
   } else {
-    return "#2ecc71"; // Green for high plateaus
+    return "#CCCCCC"; // Default gray
   }
 };
 

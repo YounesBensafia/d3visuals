@@ -1903,7 +1903,7 @@ function gaussianKernelSmoothing(data, bandwidth = 1) {
   return result;
 }
 
-function doubleExponentialSmoothing(data, alpha = 0.1, beta = 0.1) {
+function doubleExponentialSmoothing(data, alpha = 0.3, beta = 0.4) {
   const result = [];
   let level = data[0].minutes;
   let trend = 0;
