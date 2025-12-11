@@ -25,11 +25,6 @@ A collection of interactive data visualizations demonstrating various chart type
 git clone https://github.com/YounesBensafia/data-viz-labs.git
 cd data-viz-labs
 
-# Start a local server
-python -m http.server 8000
-# or
-npx serve
-
 # Open in browser
 # http://localhost:8000/visualizations/scatter-plot/
 ```
